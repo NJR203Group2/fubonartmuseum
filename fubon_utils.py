@@ -17,10 +17,14 @@ def get_exhibition_detail(detail_url, downloads_dir, title):
     html_detail = bs.BeautifulSoup(response.read(), "html.parser")
 
     # --- (1) 展期（date） ---
-    date_tag = html_detail.select_one("div#exhibition-info-basic h2.font-h2")
-    if not date_tag:
+    date_tags = html_detail.select("div#exhibition-info-basic h2.font-h2")
+    if date_tags:
+        # 最後一個 <h2> 通常為日期，例如 "2025.10.23 - 2026.4.20"
+        date = date_tags[-1].get_text(strip=True)
+    else:
+        # 備援：舊結構可能使用 detail_intro
         date_tag = html_detail.select_one("div.detail_intro h2.font-h2")
-    date = date_tag.get_text(strip=True) if date_tag else "(未提供展期)"
+        date = date_tag.get_text(strip=True) if date_tag else "(未提供展期)"
 
     # --- (2) 地點（div.content_location） ---
     location_div = html_detail.select_one("div.content_location")
